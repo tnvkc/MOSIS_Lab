@@ -1,5 +1,6 @@
 package rs.elfak.mosis.lab_2;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -57,6 +58,11 @@ public class MainActivity extends AppCompatActivity {
         }
         else if (id == R.id.about_item) {
             Toast.makeText(this, "About!", Toast.LENGTH_SHORT).show();
+        }
+        else if(id==R.id.about_item)
+        {
+            Intent intent=new Intent(this, About.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
