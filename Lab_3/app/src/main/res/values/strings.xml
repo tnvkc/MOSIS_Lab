@@ -28,4 +28,5 @@
     <string name="edit_my_place_cancel_lbl">Cancel</string>
     <string name="title_activity_view_my_places">ViewMyPlacesActivity</string>
 
+    <string name="viewmyplace_finished_button">OK</string>
 </resources>

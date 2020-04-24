@@ -52,16 +52,20 @@ public class MyPlacesList extends AppCompatActivity {
             }
         });
 
-        ListView myPlacesL = (ListView) findViewById(R.id.my_places_list);
+        final ListView myPlacesL = (ListView) findViewById(R.id.my_places_list);
         myPlacesL.setAdapter(new ArrayAdapter<MyPlace>(this, android.R.layout.simple_list_item_1,
                                                                       MyPlacesData.getInstance().getMyPlaces()));
 
         myPlacesL.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MyPlace place = (MyPlace) parent.getAdapter().getItem(position);
-                Toast.makeText(getApplicationContext(), place.getName() + " selected", Toast.LENGTH_SHORT).show();
-            }
+                                             @Override
+                                             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                                    Bundle positionBundle = new Bundle();
+                                                    positionBundle.putInt("position", position);
+                                                    Intent intent = new Intent(MyPlacesList.this, ViewMyPlacesActivity.class);
+                                                    intent.putExtras(positionBundle);
+                                                    startActivity(intent);
+                                             }
+
         });
 
     }
