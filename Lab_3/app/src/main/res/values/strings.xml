@@ -26,5 +26,6 @@
     <string name="edit_my_place_name_lbl">Name:</string>
     <string name="edit_my_place_desc_lbl">Description:</string>
     <string name="edit_my_place_cancel_lbl">Cancel</string>
+    <string name="title_activity_view_my_places">ViewMyPlacesActivity</string>
 
 </resources>

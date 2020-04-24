@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,12 +34,35 @@ public class EditMyPlaceActivity extends AppCompatActivity implements View.OnCli
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        Button finishedButton = findViewById(R.id.edit_my_place_finished_button);
+        final Button finishedButton = findViewById(R.id.edit_my_place_finished_button);
         finishedButton.setText("Add");
+        finishedButton.setEnabled(false);
         finishedButton.setOnClickListener(this);
         Button cancelButton = findViewById(R.id.edit_my_place_cancel_button);
         cancelButton.setOnClickListener(this);
 
+
+        final EditText nameEditText  = (EditText) findViewById(R.id.edit_my_place_name_edit);
+        nameEditText.addTextChangedListener(
+                new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            finishedButton.setEnabled(s.length() > 0);
+                        }
+                    }
+
+
+        );
     }
 
     @Override
@@ -96,6 +121,8 @@ public class EditMyPlaceActivity extends AppCompatActivity implements View.OnCli
         }
 
         return super.onOptionsItemSelected(item);
+
     }
+
 
 }
