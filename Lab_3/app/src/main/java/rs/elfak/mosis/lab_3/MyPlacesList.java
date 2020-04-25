@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,8 +48,8 @@ public class MyPlacesList extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+             Intent i=new Intent(MyPlacesList.this,EditMyPlaceActivity.class);
+             startActivityForResult(i, NEW_PLACE);
             }
         });
 
@@ -64,13 +65,49 @@ public class MyPlacesList extends AppCompatActivity {
                                                     Intent intent = new Intent(MyPlacesList.this, ViewMyPlacesActivity.class);
                                                     intent.putExtras(positionBundle);
                                                     startActivity(intent);
+
+         myPlacesL.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener()
+         {
+            @Override
+             public void onCreateContextMenu(ContextMenu contextMenu,View view, ContextMenu.ContextMenuInfo contextMenuInfo)
+            {
+                AdapterView.AdapterContextMenuInfo info=(AdapterView.AdapterContextMenuInfo) contextMenuInfo;
+                MyPlace myPlace=MyPlacesData.getInstance().getPlace(info.position);
+                contextMenu.setHeaderTitle(myPlace.getName());
+                contextMenu.add(0,1,1,"View place");
+                contextMenu.add(0,2,2,"Edit place");
+
+            }
+
+
+         });
                                              }
 
         });
 
     }
 
-
+    @Override
+    public boolean onContextItemSelected(MenuItem item)
+    {
+        AdapterView.AdapterContextMenuInfo info=(AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        Bundle positionBundle=new Bundle();
+        positionBundle.putInt("position",info.position);
+        Intent i=null;
+        if(item.getItemId()==1)
+        {
+            i=new Intent(this,ViewMyPlacesActivity.class);
+            i.putExtras(positionBundle);
+            startActivity(i);
+        }
+        if(item.getItemId()==2)
+        {
+            i=new Intent(this,EditMyPlaceActivity.class);
+            i.putExtras(positionBundle);
+            startActivityForResult(i,1);
+        }
+        return super.onContextItemSelected(item);
+    }
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long

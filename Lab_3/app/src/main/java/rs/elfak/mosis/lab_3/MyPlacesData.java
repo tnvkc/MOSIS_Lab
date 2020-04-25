@@ -8,11 +8,11 @@ public class MyPlacesData {
 
     private MyPlacesData() {
         myPlaces = new ArrayList<>();
-        myPlaces.add(new MyPlace("Place A"));
+        /*myPlaces.add(new MyPlace("Place A"));
         myPlaces.add(new MyPlace("Place B"));
         myPlaces.add(new MyPlace("Place C"));
         myPlaces.add(new MyPlace("Place D"));
-        myPlaces.add(new MyPlace("Place E"));
+        myPlaces.add(new MyPlace("Place E"));*/
     }
 
     private static class SingletonHolder {
