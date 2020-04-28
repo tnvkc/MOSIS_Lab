@@ -17,18 +17,14 @@
             android:name=".EditMyPlaceActivity"
             android:label="@string/title_activity_edit_my_place"
             android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="rs.elfak.mosis.lab_3.MainActivity" />
+
         </activity>
         <activity
             android:name=".MyPlacesList"
             android:label="@string/title_activity_my_places_list"
-            android:parentActivityName=".MainActivity"
+
             android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="rs.elfak.mosis.lab_3.MainActivity" />
+
         </activity>
         <activity
             android:name=".MainActivity"
