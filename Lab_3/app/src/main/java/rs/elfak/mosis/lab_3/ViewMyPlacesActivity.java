@@ -88,7 +88,7 @@ public class ViewMyPlacesActivity extends AppCompatActivity {
             Intent intent=new Intent(this, About.class);
             startActivity(intent);
         }
-        else if (id == R.id.home) {
+        else if (id == android.R.id.home) {
             setResult(Activity.RESULT_CANCELED);
             finish();
         }

@@ -6,15 +6,9 @@ public class MyPlace {
 
     private String name;
     private String description;
-
-    public MyPlace(String name, String desc){
-        this.name = name;
-        this.description = desc;
-    }
-
-    public MyPlace(String name){
-        this(name, "");
-    }
+    private String latitude;
+    private String longitude;
+    private long ID;
 
     public String getName() {
         return name;
@@ -31,6 +25,40 @@ public class MyPlace {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public long getID() {
+        return ID;
+    }
+
+    public void setID(long ID) {
+        this.ID = ID;
+    }
+
+    public MyPlace(String name, String desc){
+        this.name = name;
+        this.description = desc;
+    }
+
+    public MyPlace(String name){
+        this(name, "");
+    }
+
 
     @NonNull
     @Override
