@@ -2,6 +2,7 @@ package rs.elfak.mosis.lab_3;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 
 import org.osmdroid.api.IMapController;
@@ -23,10 +24,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewManager;
+import android.widget.Button;
 
+import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
@@ -40,21 +45,68 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
     static final int PERMISSION_ACCESS_FINE_LOCATION=1;
     MyLocationNewOverlay myLocationOverlay;//DK
 
+    public static final int SHOW_MAP = 0;
+    public static final int CENTER_PLACE_ON_MAP = 1;
+    public static final int SELECT_COORDINATE = 2;
+
+    private int state = 0;
+    private boolean selCoorsEnabled = false;
+    private GeoPoint placeLoc;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        try{
+            Intent mapIntent = getIntent();
+            Bundle mapBundle = mapIntent .getExtras();
+
+            if(mapBundle != null)
+            {
+                state = mapBundle.getInt("state");
+                if(state == CENTER_PLACE_ON_MAP)
+                {
+                    String placeLat = mapBundle.getString("lat");
+                    String placeLon = mapBundle.getString("lon");
+                    placeLoc = new GeoPoint(Double.parseDouble(placeLat), Double.parseDouble(placeLon));
+                }
+            }
+        }catch (Exception e)
+        {
+
+        }
+
+
         setContentView(R.layout.activity_my_places_maps);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i=new Intent(MyPlacesMapsActivity.this,EditMyPlaceActivity.class);
-                startActivityForResult(i,NEW_PLACE);
+
+
+        if(state != SELECT_COORDINATE)
+        {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent i=new Intent(MyPlacesMapsActivity.this,EditMyPlaceActivity.class);
+                    startActivityForResult(i,NEW_PLACE);
+                }
+            });
+        }
+        else
+        {
+            ViewGroup layout = (ViewGroup) fab.getParent();
+            if(null!= layout)
+            {
+                layout.removeView(fab);
             }
-        });
+        }
+
+
+
+
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Context cntx=getApplicationContext();
@@ -66,23 +118,62 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
         {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_ACCESS_FINE_LOCATION);
         }
-        else
-            setMyLocationOverlay();
+        else {
+           setupMap();
+        }
 
+
+    }
+
+    private void setCenterPlaceOnMap()
+    {
         mapController=map.getController();
         if(mapController!=null)
         {
             mapController.setZoom(15.0);
-            GeoPoint startPoint=new GeoPoint(43.3209, 21.8958);
-            mapController.setCenter(startPoint);
+           // GeoPoint startPoint=new GeoPoint(43.3209, 21.8958);
+            mapController.setCenter(placeLoc);
         }
     }
+
+    private void setupMap()
+    {
+        switch (state)
+        {
+            case SHOW_MAP:
+                setMyLocationOverlay();
+                break;
+            case SELECT_COORDINATE:
+                mapController=map.getController();
+                if(mapController!=null)
+                {
+                    mapController.setZoom(15.0);
+
+                    mapController.setCenter(new GeoPoint(43.3209,21.895 ));
+                }
+                setOnMapClickOverlay();
+            case CENTER_PLACE_ON_MAP:
+            default:
+                setCenterPlaceOnMap();
+                break;
+        }
+    }
+
+
 
     private void setMyLocationOverlay()
     {
         myLocationOverlay=new MyLocationNewOverlay(new GpsMyLocationProvider(this),map);
         myLocationOverlay.enableMyLocation();
         map.getOverlays().add(this.myLocationOverlay);
+
+        mapController=map.getController();
+        if(mapController!=null)
+        {
+            mapController.setZoom(15.0);
+
+            myLocationOverlay.enableFollowLocation();
+        }
     }
 
     @Override
@@ -121,8 +212,9 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
         {
             case PERMISSION_ACCESS_FINE_LOCATION:
             {
-                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED)
-                    setMyLocationOverlay();
+                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) {
+                    setupMap();
+                }
                 return;
             }
         }
@@ -140,4 +232,30 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
         map.onPause();
     }
 
+    private void setOnMapClickOverlay()
+    {
+        MapEventsReceiver mReceive = new MapEventsReceiver() {
+            @Override
+            public boolean singleTapConfirmedHelper(GeoPoint p) {
+                String lon = Double.toString(p.getLongitude());
+                String lat = Double.toString(p.getLatitude());
+
+                Intent locationIntent = new Intent();
+                locationIntent.putExtra("lon", lon);
+                locationIntent.putExtra("lat", lat);
+                setResult(Activity.RESULT_OK, locationIntent);
+                finish();
+
+                return false;
+            }
+
+            @Override
+            public boolean longPressHelper(GeoPoint p) {
+                return false;
+            }
+        };
+
+        MapEventsOverlay overlayEvents = new MapEventsOverlay(mReceive);
+        map.getOverlays().add(overlayEvents);
+    }
 }

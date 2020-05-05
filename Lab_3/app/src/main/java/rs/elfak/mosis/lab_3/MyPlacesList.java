@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -76,6 +77,7 @@ public class MyPlacesList extends AppCompatActivity {
                 contextMenu.setHeaderTitle(myPlace.getName());
                 contextMenu.add(0,1,1,"View place");
                 contextMenu.add(0,2,2,"Edit place");
+                contextMenu.add(0,3,3,"Delete place");
 
             }
 
@@ -100,14 +102,26 @@ public class MyPlacesList extends AppCompatActivity {
             i.putExtras(positionBundle);
             startActivity(i);
         }
-        if(item.getItemId()==2)
+        else if(item.getItemId()==2)
         {
             i=new Intent(this,EditMyPlaceActivity.class);
             i.putExtras(positionBundle);
             startActivityForResult(i,1);
         }
+        else if(item.getItemId()==3)
+        {
+            MyPlacesData.getInstance().deletePlace(info.position);
+            setList();
+        }
         return super.onContextItemSelected(item);
     }
+
+    private void setList()
+    {
+        ListView myPlaceList = (ListView) findViewById(R.id.my_places_list);
+        myPlaceList.setAdapter(new ArrayAdapter<MyPlace>(this, android.R.layout.simple_list_item_1, MyPlacesData.getInstance().getMyPlaces()));
+    }
+
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
