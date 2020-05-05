@@ -15,6 +15,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -27,13 +28,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.MapEventsOverlay;
+import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
+import java.util.ArrayList;
 
 import rs.elfak.mosis.lab_3.R;
 
@@ -42,6 +49,7 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
     MapView map=null;
     IMapController mapController=null;
     static int NEW_PLACE = 1;
+    static int EDIT_PLACE = 2;
     static final int PERMISSION_ACCESS_FINE_LOCATION=1;
     MyLocationNewOverlay myLocationOverlay;//DK
 
@@ -52,6 +60,8 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
     private int state = 0;
     private boolean selCoorsEnabled = false;
     private GeoPoint placeLoc;
+
+    private ItemizedIconOverlay<OverlayItem> myPlacesOverlay; ///////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,7 +158,6 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
                 if(mapController!=null)
                 {
                     mapController.setZoom(15.0);
-
                     mapController.setCenter(new GeoPoint(43.3209,21.895 ));
                 }
                 setOnMapClickOverlay();
@@ -157,6 +166,7 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
                 setCenterPlaceOnMap();
                 break;
         }
+        showMyPlaces();
     }
 
 
@@ -179,29 +189,43 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_my_places_maps,menu);
-        return true;
+        if (state == SELECT_COORDINATE && !selCoorsEnabled) {
+            menu.add(0, 1, 1, "Select Coordinates");
+            menu.add(0, 2, 2, "Cancel");
+            return super.onCreateOptionsMenu(menu);
+        } else {
+            getMenuInflater().inflate(R.menu.menu_my_places_maps, menu);
+            return true;
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem)
     {
         int id= menuItem.getItemId();
-        if(id==R.id.new_place_item)
-        {
-            Intent i=new Intent(this,EditMyPlaceActivity.class);
-            startActivityForResult(i,1);
+
+        if (state == SELECT_COORDINATE && !selCoorsEnabled) {
+            if (id == 1) {
+                selCoorsEnabled = true;
+                Toast.makeText(this, "Select coordinates", Toast.LENGTH_SHORT).show();
+            } else if (id == 2) {
+                setResult(Activity.RESULT_CANCELED);
+                finish();
+            }
+        } else {
+            if (id==R.id.new_place_item) {
+                Intent i = new Intent(this, EditMyPlaceActivity.class);
+                startActivityForResult(i, 1);
+            }
+            else if (id==R.id.about_item) {
+                Intent i = new Intent(this, About.class);
+                startActivity(i);
+            }
+            else if (id==android.R.id.home) {
+                finish();
+            }
         }
-        else if(id==R.id.about_item)
-        {
-            Intent i=new Intent(this,About.class);
-            startActivity(i);
-        }
-        else if(id==android.R.id.home)
-        {
-            finish();
-        }
-        return super.onOptionsItemSelected(menuItem );
+        return super.onOptionsItemSelected(menuItem);
     }
 
     @SuppressLint("MissingPermission")
@@ -237,15 +261,16 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
         MapEventsReceiver mReceive = new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
-                String lon = Double.toString(p.getLongitude());
-                String lat = Double.toString(p.getLatitude());
+                if (state == SELECT_COORDINATE && selCoorsEnabled) {
+                    String lon = Double.toString(p.getLongitude());
+                    String lat = Double.toString(p.getLatitude());
 
-                Intent locationIntent = new Intent();
-                locationIntent.putExtra("lon", lon);
-                locationIntent.putExtra("lat", lat);
-                setResult(Activity.RESULT_OK, locationIntent);
-                finish();
-
+                    Intent locationIntent = new Intent();
+                    locationIntent.putExtra("lon", lon);
+                    locationIntent.putExtra("lat", lat);
+                    setResult(Activity.RESULT_OK, locationIntent);
+                    finish();
+                }
                 return false;
             }
 
@@ -257,5 +282,46 @@ public class MyPlacesMapsActivity extends AppCompatActivity {
 
         MapEventsOverlay overlayEvents = new MapEventsOverlay(mReceive);
         map.getOverlays().add(overlayEvents);
+    }
+
+    private void showMyPlaces() {
+
+        if (myPlacesOverlay != null)
+            this.map.getOverlays().remove(myPlacesOverlay);
+
+        final ArrayList<OverlayItem> items = new ArrayList<>();
+        for (int i = 0; i < MyPlacesData.getInstance().getMyPlaces().size(); i++) {
+            MyPlace myPlace = MyPlacesData.getInstance().getMyPlaces().get(i); //getPlace(i)
+            OverlayItem item = new OverlayItem(myPlace.getName(), myPlace.getDescription(),
+                    new GeoPoint(Double.parseDouble(myPlace.getLatitude()), Double.parseDouble(myPlace.getLongitude())));
+            item.setMarker(this.getResources().getDrawable(R.drawable.baseline_room_black_48)); //
+            items.add(item);
+        }
+        ItemizedIconOverlay<OverlayItem> myPlacesOverlay = new ItemizedIconOverlay<>(items, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+            @Override
+            public boolean onItemSingleTapUp(int index, OverlayItem item) {
+                Intent intent = new Intent(MyPlacesMapsActivity.this, ViewMyPlacesActivity.class);
+                intent.putExtra("position", index);
+                startActivity(intent);
+                return true;
+            }
+
+            @Override
+            public boolean onItemLongPress(int index, OverlayItem item) {
+                Intent intent = new Intent(MyPlacesMapsActivity.this, EditMyPlaceActivity.class);
+                intent.putExtra("position", index);
+                startActivityForResult(intent, EDIT_PLACE);
+                return true;
+            }
+        }, getApplicationContext());
+        this.map.getOverlays().add(myPlacesOverlay);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            showMyPlaces(); /////////////
+        }
     }
 }

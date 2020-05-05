@@ -106,11 +106,11 @@ public class EditMyPlaceActivity extends AppCompatActivity implements View.OnCli
                 EditText descEditText = findViewById(R.id.edit_my_place_desc_edit);
                 String desc = descEditText.getText().toString();
 
-                EditText latEdit = findViewById(R.id.edit_my_place_lon_edit);
-                String lat = descEditText.getText().toString();
+                EditText latEdit = (EditText) findViewById(R.id.edit_my_place_lat_edit);
+                String lat = latEdit.getText().toString();
 
                 EditText lonEdit = findViewById(R.id.edit_my_place_lon_edit);
-                String lon = descEditText.getText().toString();
+                String lon = lonEdit.getText().toString();
 
 
 
@@ -142,6 +142,7 @@ public class EditMyPlaceActivity extends AppCompatActivity implements View.OnCli
             case R.id.edit_my_place_location_button:
             {
                 Intent i = new Intent(this, MyPlacesMapsActivity.class);
+                i.putExtra("state", MyPlacesMapsActivity.SELECT_COORDINATE);
                 startActivityForResult(i, 1);
             }
         }
