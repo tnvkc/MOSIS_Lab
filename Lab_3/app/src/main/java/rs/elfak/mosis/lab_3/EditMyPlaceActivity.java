@@ -112,8 +112,6 @@ public class EditMyPlaceActivity extends AppCompatActivity implements View.OnCli
                 EditText lonEdit = findViewById(R.id.edit_my_place_lon_edit);
                 String lon = lonEdit.getText().toString();
 
-
-
                 if(!editMode)
                 {
                     MyPlace place=new MyPlace(name, desc);
@@ -123,11 +121,7 @@ public class EditMyPlaceActivity extends AppCompatActivity implements View.OnCli
                 }
                 else
                 {
-                    MyPlace place = MyPlacesData.getInstance().getPlace(position);
-                    place.setName(name);
-                    place.setDescription(desc);
-                    place.setLatitude(lat);
-                    place.setLongitude(lon);
+                    MyPlacesData.getInstance().updatePlace(position,name,desc,lon,lat);
                 }
 
                 setResult(Activity.RESULT_OK);

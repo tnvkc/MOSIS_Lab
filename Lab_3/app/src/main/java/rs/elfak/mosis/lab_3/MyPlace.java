@@ -2,14 +2,19 @@ package rs.elfak.mosis.lab_3;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.IgnoreExtraProperties;
+
+@IgnoreExtraProperties
 public class MyPlace {
 
-    private String name;
-    private String description;
-    private String latitude;
-    private String longitude;
-    private long ID;
-
+    public String name;
+    public String description;
+    public String latitude;
+    public String longitude;
+    @Exclude
+    public String key;
+    public MyPlace(){}
     public String getName() {
         return name;
     }
@@ -42,13 +47,13 @@ public class MyPlace {
         this.longitude = longitude;
     }
 
-    public long getID() {
+    /*public long getID() {
         return ID;
     }
 
     public void setID(long ID) {
         this.ID = ID;
-    }
+    }*/
 
     public MyPlace(String name, String desc){
         this.name = name;

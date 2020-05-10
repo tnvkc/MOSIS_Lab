@@ -61,6 +61,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/edit_my_place_lon_edit"/>
         </LinearLayout>
+
         <Button
             android:id="@+id/edit_my_place_location_button"
             android:layout_width="match_parent"
