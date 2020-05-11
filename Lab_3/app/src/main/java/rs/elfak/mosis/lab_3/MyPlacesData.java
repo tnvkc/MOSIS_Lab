@@ -12,6 +12,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MyPlacesData {
 
@@ -33,10 +34,20 @@ public class MyPlacesData {
         myPlaces.add(new MyPlace("Place E"));*/
     }
 
+    ListUpdatedEventListener updateListener;
+    public void setEventListener(ListUpdatedEventListener listener) {
+        updateListener = listener;
+    }
+
+    public interface ListUpdatedEventListener {
+        void onListUpdated();
+    }
+
     ValueEventListener parentEventListener=new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
+            if (updateListener != null)
+                updateListener.onListUpdated();
         }
 
         @Override
@@ -48,17 +59,44 @@ public class MyPlacesData {
     ChildEventListener childEventListener=new ChildEventListener() {
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            String myPlaceKey = dataSnapshot.getKey();
 
+            if (!myPlacesKeyIndexMapping.containsKey(myPlaceKey)) {
+                MyPlace myPlace = dataSnapshot.getValue(MyPlace.class);
+                myPlace.key = myPlaceKey;
+                myPlaces.add(myPlace);
+                myPlacesKeyIndexMapping.put(myPlaceKey, myPlaces.size() - 1);
+                if (updateListener != null)
+                    updateListener.onListUpdated();
+            }
         }
 
         @Override
         public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+            String myPlaceKey = dataSnapshot.getKey();
+            MyPlace myPlace = dataSnapshot.getValue(MyPlace.class);
+            myPlace.key = myPlaceKey;
+            if (myPlacesKeyIndexMapping.containsKey(myPlaceKey)) {
+                int index = myPlacesKeyIndexMapping.get(myPlaceKey);
+                myPlaces.set(index, myPlace);
+            } else {
+                myPlaces.add(myPlace);
+                myPlacesKeyIndexMapping.put(myPlaceKey, myPlaces.size() - 1);
+            }
+            if (updateListener != null)
+                updateListener.onListUpdated();
         }
 
         @Override
         public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
+            String myPlaceKey = dataSnapshot.getKey();
+            if (myPlacesKeyIndexMapping.containsKey(myPlaceKey)) {
+                int index = myPlacesKeyIndexMapping.get(myPlaceKey);
+                myPlaces.remove(index);
+                recreateKeyIndexMapping();
+            }
+            if (updateListener != null)
+                updateListener.onListUpdated();
         }
 
         @Override
